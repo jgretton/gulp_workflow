@@ -6,8 +6,8 @@ Includes:
     - Css autofixer
     - Css minifier
     - Image optimisation
-    - HTML file copy
-
+    - HTML minifier
+    - JS minifier
 All processes will be stored in Distribution folder ready for deployment
 */
 
@@ -18,6 +18,8 @@ const autoPrefixer = require('gulp-autoprefixer');
 const imageMin = require('gulp-imagemin');
 const cleanCss = require('gulp-clean-css')
 const rename = require('gulp-rename');
+const htmlMin = require('gulp-html-minifier');
+const jsMin = require('gulp-minify');
 
 
 //Sass compiler and Css minifier
@@ -32,8 +34,6 @@ gulp.task('sass', function(){
     .pipe(gulp.dest('src/resources/css/'))
     //calls minify functiom
     .pipe(cleanCss({compatibility: 'ie8' }))
-    //calls rename function
-    .pipe(rename('main.min.css'))
     //destination for Minified css
     .pipe(gulp.dest('dist/resources/css/'))
     //streams files to browser
@@ -63,13 +63,31 @@ gulp.task('imageMin', function(){
     .pipe(gulp.dest('dist/resources/images/'))
 })
 
-//HTML file copy
-gulp.task('copyHtml', function(){
+//JS Minifier
+gulp.task('jsMin', function(){
+    //reads in JS files
+    gulp.src('src/resources/js/*.js')
+    //Minifies JS,     
+    .pipe(jsMin({
+        ext:{
+            //sets file extension to just .JS
+            min:'.js'
+        },
+        // Makes sure the sources file isnt transferred
+        noSource: 'true'
+    }))
+    //destination for minified JS files
+    .pipe(gulp.dest('dist/resources/js'))
+})
+
+//HTML minifier
+gulp.task('htmlMin', function(){
     //reads in HTML file
     return gulp.src('src/index.html')
-    //destination for the new copy
+    //removes white space
+    .pipe(htmlMin({collapseWhitespace : true}))
     .pipe(gulp.dest('dist'));
-});
+})
 
 //Browser Sync (also calls Sass compiler/)
 gulp.task('serve', ['sass'], function(){
@@ -84,4 +102,4 @@ gulp.task('serve', ['sass'], function(){
 });
 
 //Runs all gulp tasks
-gulp.task('default', ['serve', 'imageMin', 'autoPrefixer', 'copyHtml']);
+gulp.task('default', ['serve','imageMin', 'autoPrefixer', 'htmlMin','jsMin']);
